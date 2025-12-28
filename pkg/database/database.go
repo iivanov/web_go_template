@@ -2,28 +2,45 @@ package database
 
 import (
 	"fmt"
+	"log/slog"
 	"os"
 
+	slogGorm "github.com/orandin/slog-gorm"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
-	"gorm.io/gorm/logger"
 )
 
-func NewConnection() (*gorm.DB, error) {
+func NewConnection(logger *slog.Logger, config Config) (*gorm.DB, error) {
 	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=%s TimeZone=UTC",
-		getEnv("DB_HOST", "localhost"),
-		getEnv("DB_USER", "gonewproject"),
-		getEnv("DB_PASSWORD", "gonewproject"),
-		getEnv("DB_NAME", "gonewproject"),
-		getEnv("DB_PORT", "5432"),
-		getEnv("DB_SSLMODE", "disable"),
+		config.Host,
+		config.User,
+		config.Password,
+		config.Name,
+		config.Port,
+		config.SSLMode,
+	)
+
+	gormLogger := slogGorm.New(
+		slogGorm.WithHandler(logger.Handler()),
+		slogGorm.WithTraceAll(),
 	)
 
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
-		Logger: logger.Default.LogMode(logger.Info),
+		Logger: gormLogger,
 	})
 	if err != nil {
 		return nil, fmt.Errorf("failed to connect to database: %w", err)
+	}
+
+	// Enable UUID extension
+	sqlDB, err := db.DB()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get underlying sql.DB: %w", err)
+	}
+
+	_, err = sqlDB.Exec("CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\"")
+	if err != nil {
+		return nil, fmt.Errorf("failed to create uuid-ossp extension: %w", err)
 	}
 
 	return db, nil

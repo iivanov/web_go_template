@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log/slog"
 	someboundedcontext "project_template/internal/someboundedcontext/config"
+	"project_template/pkg/database"
 	"project_template/pkg/webserver"
 	"strings"
 
@@ -15,6 +16,7 @@ import (
 type Config struct {
 	WebServer          webserver.Config
 	SomeBoundedContext someboundedcontext.Config
+	Database           database.Config
 	fx.Out
 }
 

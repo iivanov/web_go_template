@@ -1,67 +1,50 @@
 .PHONY: help build run test clean docker-up docker-down docker-logs deps fmt lint
 
-# Default target
-help:
-	@echo "Available commands:"
-	@echo "  make build     - Build the project with GOEXPERIMENT=jsonv2"
-	@echo "  make run       - Build and run the project"
-	@echo "  make test      - Run tests"
-	@echo "  make clean     - Clean build artifacts"
-	@echo "  make docker-up - Start PostgreSQL via Docker Compose"
-	@echo "  make docker-down - Stop PostgreSQL via Docker Compose"
-	@echo "  make docker-logs - Show PostgreSQL logs"
-	@echo "  make deps      - Download dependencies"
-	@echo "  make fmt       - Format Go code"
-	@echo "  make lint      - Run linter"
+help: ## Show this help message
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 
-# Build the project with GOEXPERIMENT=jsonv2
-build:
+build: ## Build the project with GOEXPERIMENT=jsonv2
 	@echo "Building with GOEXPERIMENT=jsonv2..."
 	GOEXPERIMENT=jsonv2 go build -o bin/gonewproject main.go
 
-# Build and run the project
-run: build
+run: build ## Build and run the project
 	@echo "Running the application..."
 	./bin/gonewproject
 
-# Run tests
-test:
+run-serve: build ## Build and run the project with serve
+	@echo "Running the application with serve..."
+	./bin/gonewproject serve
+
+test: ## Run tests
 	@echo "Running tests..."
 	GOEXPERIMENT=jsonv2 go test -v ./...
 
-# Clean build artifacts
-clean:
+clean: ## Clean build artifacts
 	@echo "Cleaning up..."
 	rm -rf bin/
 	go clean -cache
 
-# Start PostgreSQL via Docker Compose
-docker-up:
+docker-up: ## Start PostgreSQL via Docker Compose
 	@echo "Starting PostgreSQL..."
-	docker-compose up -d postgres
+	docker compose up -d
 
-# Stop PostgreSQL via Docker Compose
-docker-down:
+docker-down: ## Stop PostgreSQL via Docker Compose
 	@echo "Stopping PostgreSQL..."
-	docker-compose down
+	docker compose down
 
-# Show PostgreSQL logs
-docker-logs:
-	docker-compose logs -f postgres
+docker-logs: ## Show PostgreSQL logs
+	docker compose logs -f
 
-# Download dependencies
-deps:
+deps: ## Download dependencies
 	@echo "Downloading dependencies..."
 	go mod download
 	go mod tidy
 
-# Format Go code
-fmt:
+fmt: ## Format Go code
 	@echo "Formatting code..."
 	go fmt ./...
 
-# Run linter (requires golangci-lint)
-lint:
+lint: ## Run linter (requires golangci-lint)
 	@echo "Running linter..."
 	@if command -v golangci-lint >/dev/null 2>&1; then \
 		golangci-lint run; \

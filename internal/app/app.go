@@ -2,6 +2,7 @@ package app
 
 import (
 	"project_template/internal/someboundedcontext"
+	"project_template/pkg/database"
 	"project_template/pkg/logger"
 	"project_template/pkg/webserver"
 
@@ -12,6 +13,7 @@ func generalModules() []fx.Option {
 	return []fx.Option{
 		logger.Module,
 		someboundedcontext.Module,
+		database.Module,
 	}
 }
 

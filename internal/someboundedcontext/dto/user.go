@@ -1,13 +1,18 @@
 package dto
 
+import (
+	"github.com/google/uuid"
+)
+
 type CreateUserRequest struct {
-	Name string `json:"name"`
+	Name  string `json:"name"`
+	Email string `json:"email"`
 }
 
 type UserResponse struct {
-	UID   string `json:"id"`
-	Name  string `json:"name"`
-	Email string `json:"email"`
+	ID    uuid.UUID `json:"id"`
+	Name  string    `json:"name"`
+	Email string    `json:"email"`
 }
 
 type UsersListResponse []UserResponse

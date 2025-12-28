@@ -5,9 +5,11 @@
 -- Create additional schemas if needed
 -- CREATE SCHEMA IF NOT EXISTS app_schema;
 
+-- Enable UUID extension
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
 -- GORM will create the users table with the following structure:
--- - id (serial, primary key)
--- - uid (varchar, unique, not null)
+-- - id (uuid, primary key, default: gen_random_uuid())
 -- - name (varchar, not null)
 -- - email (varchar, unique, not null)
 -- - created_at (timestamp)
