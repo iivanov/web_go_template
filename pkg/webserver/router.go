@@ -2,6 +2,7 @@ package webserver
 
 import (
 	"net/http"
+	"project_template/pkg/telemetry"
 
 	"go.uber.org/fx"
 )
@@ -12,7 +13,8 @@ type Router struct {
 
 type RouterParams struct {
 	fx.In
-	Routes []Route `group:"routes"`
+	Routes    []Route `group:"routes"`
+	Telemetry *telemetry.Telemetry
 }
 
 func NewRouter(params RouterParams) *Router {
@@ -24,5 +26,7 @@ func NewRouter(params RouterParams) *Router {
 }
 
 func (r *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
-	r.mux.ServeHTTP(w, req)
+	//TODO: pass middleware to router using fx
+	// Apply telemetry middleware
+	telemetry.HTTPMiddleware(r.mux).ServeHTTP(w, req)
 }

@@ -9,8 +9,10 @@ import (
 	"project_template/internal/someboundedcontext/entities"
 	"project_template/internal/someboundedcontext/repositories"
 	repoErrors "project_template/internal/someboundedcontext/repositories"
+	"project_template/pkg/telemetry"
 
 	"github.com/google/uuid"
+	"go.opentelemetry.io/otel/attribute"
 )
 
 var (
@@ -32,6 +34,10 @@ func NewUserService(logger *slog.Logger, config config.Config, repository *repos
 }
 
 func (s *UserService) GetUser(ctx context.Context, id string) (dto.UserResponse, error) {
+	ctx, span := telemetry.StartServiceSpan(ctx, "UserService", "GetUser")
+	defer span.End()
+	span.SetAttributes(attribute.String("user.id", id))
+
 	uid, err := uuid.Parse(id)
 	if err != nil {
 		return dto.UserResponse{}, ErrUserNotFound
@@ -42,6 +48,7 @@ func (s *UserService) GetUser(ctx context.Context, id string) (dto.UserResponse,
 		if errors.Is(err, repoErrors.ErrUserNotFound) {
 			return dto.UserResponse{}, ErrUserNotFound
 		}
+		telemetry.RecordError(span, err)
 		s.logger.Error("failed to get user", "error", err, "id", uid)
 		return dto.UserResponse{}, err
 	}
@@ -54,12 +61,17 @@ func (s *UserService) GetUser(ctx context.Context, id string) (dto.UserResponse,
 }
 
 func (s *UserService) ListUsers(ctx context.Context) (dto.UsersListResponse, error) {
+	ctx, span := telemetry.StartServiceSpan(ctx, "UserService", "ListUsers")
+	defer span.End()
+
 	users, err := s.repository.GetAll(ctx)
 	if err != nil {
+		telemetry.RecordError(span, err)
 		s.logger.Error("failed to list users", "error", err)
 		return nil, err
 	}
 
+	span.SetAttributes(attribute.Int("users.count", len(users)))
 	response := make(dto.UsersListResponse, len(users))
 	for i, user := range users {
 		response[i] = dto.UserResponse{
@@ -73,6 +85,13 @@ func (s *UserService) ListUsers(ctx context.Context) (dto.UsersListResponse, err
 }
 
 func (s *UserService) CreateUser(ctx context.Context, user dto.CreateUserRequest) (dto.UserResponse, error) {
+	ctx, span := telemetry.StartServiceSpan(ctx, "UserService", "CreateUser")
+	defer span.End()
+	span.SetAttributes(
+		attribute.String("user.name", user.Name),
+		attribute.String("user.email", user.Email),
+	)
+
 	newUser := &entities.User{
 		Name:  user.Name,
 		Email: user.Email,
@@ -80,10 +99,12 @@ func (s *UserService) CreateUser(ctx context.Context, user dto.CreateUserRequest
 
 	err := s.repository.Create(ctx, newUser)
 	if err != nil {
+		telemetry.RecordError(span, err)
 		s.logger.Error("failed to create user", "error", err)
 		return dto.UserResponse{}, err
 	}
 
+	span.SetAttributes(attribute.String("user.id", newUser.ID.String()))
 	return dto.UserResponse{
 		ID:    newUser.ID,
 		Name:  newUser.Name,
