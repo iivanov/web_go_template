@@ -27,6 +27,8 @@ func NewRouter(params RouterParams) *Router {
 
 func (r *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	//TODO: pass middleware to router using fx
-	// Apply telemetry middleware
-	telemetry.HTTPMiddleware(r.mux).ServeHTTP(w, req)
+	// Apply telemetry middleware (tracing + metrics)
+	handler := telemetry.HTTPMiddleware(r.mux)
+	handler = telemetry.HTTPMetricsMiddleware(handler)
+	handler.ServeHTTP(w, req)
 }
