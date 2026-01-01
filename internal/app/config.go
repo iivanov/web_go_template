@@ -16,11 +16,12 @@ import (
 )
 
 type Config struct {
-	WebServer          webserver.Config
-	SomeBoundedContext someboundedcontext.Config
-	Database           database.Config
-	Telemetry          telemetry.Config
 	fx.Out
+
+	WebServer          webserver.Config          `mapstructure:"webserver"`
+	SomeBoundedContext someboundedcontext.Config `mapstructure:"someboundedcontext"`
+	Database           database.Config           `mapstructure:"database"`
+	Telemetry          telemetry.Config          `mapstructure:"telemetry"`
 }
 
 func NewServeConfig(yamlConfigFile string) func() (Config, error) {

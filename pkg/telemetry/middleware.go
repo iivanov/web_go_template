@@ -2,12 +2,23 @@ package telemetry
 
 import (
 	"net/http"
+	"project_template/pkg/webserver"
 
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/propagation"
 	"go.opentelemetry.io/otel/trace"
 )
+
+// NewHTTPMiddleware returns the tracing middleware as a provider for fx injection.
+func NewHTTPMiddleware(_ *Telemetry) webserver.Middleware {
+	return HTTPMiddleware
+}
+
+// NewHTTPMetricsMiddleware returns the metrics middleware as a provider for fx injection.
+func NewHTTPMetricsMiddleware(_ *Telemetry) webserver.Middleware {
+	return HTTPMetricsMiddleware
+}
 
 // HTTPMiddleware creates a middleware that traces HTTP requests
 func HTTPMiddleware(next http.Handler) http.Handler {

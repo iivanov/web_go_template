@@ -39,6 +39,8 @@ func NewTelemetry(lc fx.Lifecycle, cfg Config, logger *slog.Logger) (*Telemetry,
 			config: cfg,
 			logger: logger,
 		}, nil
+	} else {
+		logger.Info("Telemetry enabled")
 	}
 
 	ctx := context.Background()
