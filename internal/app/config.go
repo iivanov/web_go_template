@@ -5,6 +5,7 @@ import (
 	"log/slog"
 	someboundedcontext "project_template/internal/someboundedcontext/config"
 	"project_template/pkg/database"
+	"project_template/pkg/messagebus"
 	"project_template/pkg/telemetry"
 	"project_template/pkg/webserver"
 	"strings"
@@ -22,6 +23,7 @@ type Config struct {
 	SomeBoundedContext someboundedcontext.Config `mapstructure:"someboundedcontext"`
 	Database           database.Config           `mapstructure:"database"`
 	Telemetry          telemetry.Config          `mapstructure:"telemetry"`
+	MessageBus         messagebus.Config         `mapstructure:"messagebus"`
 }
 
 func NewServeConfig(yamlConfigFile string) func() (Config, error) {

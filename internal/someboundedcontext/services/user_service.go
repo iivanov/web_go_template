@@ -4,11 +4,13 @@ import (
 	"context"
 	"errors"
 	"log/slog"
+	"project_template/internal/shared/events"
 	"project_template/internal/someboundedcontext/config"
 	"project_template/internal/someboundedcontext/dto"
 	"project_template/internal/someboundedcontext/entities"
 	"project_template/internal/someboundedcontext/repositories"
 	repoErrors "project_template/internal/someboundedcontext/repositories"
+	"project_template/pkg/messagebus"
 	"project_template/pkg/telemetry"
 
 	"github.com/google/uuid"
@@ -23,13 +25,15 @@ type UserService struct {
 	logger     *slog.Logger
 	config     config.Config
 	repository *repositories.UserRepository
+	publisher  messagebus.Publisher
 }
 
-func NewUserService(logger *slog.Logger, config config.Config, repository *repositories.UserRepository) *UserService {
+func NewUserService(logger *slog.Logger, config config.Config, repository *repositories.UserRepository, publisher messagebus.Publisher) *UserService {
 	return &UserService{
 		logger:     logger,
 		config:     config,
 		repository: repository,
+		publisher:  publisher,
 	}
 }
 
@@ -102,6 +106,15 @@ func (s *UserService) CreateUser(ctx context.Context, user dto.CreateUserRequest
 		telemetry.RecordError(span, err)
 		s.logger.Error("failed to create user", "error", err)
 		return dto.UserResponse{}, err
+	}
+
+	event := events.UserCreatedEvent{
+		UserID: newUser.ID,
+		Name:   newUser.Name,
+		Email:  newUser.Email,
+	}
+	if err := s.publisher.Publish(ctx, event); err != nil {
+		s.logger.Error("failed to publish UserCreatedEvent", "error", err, "user_id", newUser.ID)
 	}
 
 	span.SetAttributes(attribute.String("user.id", newUser.ID.String()))
