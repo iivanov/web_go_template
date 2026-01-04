@@ -5,6 +5,7 @@ import (
 	"log/slog"
 	"net/http"
 
+	apperrors "project_template/internal/shared/errors"
 	"project_template/internal/someboundedcontext/services"
 )
 
@@ -24,20 +25,13 @@ func (*UsersHandler) Pattern() string {
 	return "GET /api/users"
 }
 
-func (h *UsersHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func (h *UsersHandler) Handle(w http.ResponseWriter, r *http.Request) error {
 	users, err := h.userService.ListUsers(r.Context())
 	if err != nil {
 		h.logger.Error("failed to list users", "error", err)
-		http.Error(w, "failed to list users", http.StatusInternalServerError)
-
-		return
+		return apperrors.NewInternalError("failed to list users")
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	if err := json.MarshalWrite(w, users); err != nil {
-		h.logger.Error("failed to encode users", "error", err)
-		w.WriteHeader(http.StatusInternalServerError)
-
-		return
-	}
+	return json.MarshalWrite(w, users)
 }

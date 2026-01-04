@@ -1,6 +1,7 @@
 package webserver
 
 import (
+	"log/slog"
 	"net/http"
 
 	"go.uber.org/fx"
@@ -13,7 +14,9 @@ type Router struct {
 
 type RouterParams struct {
 	fx.In
+	Logger      *slog.Logger
 	Routes      []Route      `group:"routes"`
+	AppRoutes   []AppRoute   `group:"approutes"`
 	Middlewares []Middleware `group:"middlewares"`
 }
 
@@ -21,6 +24,10 @@ func NewRouter(params RouterParams) *Router {
 	mux := http.NewServeMux()
 	for _, r := range params.Routes {
 		mux.Handle(r.Pattern(), r)
+	}
+	for _, r := range params.AppRoutes {
+		adapter := &appRouteAdapter{route: r, logger: params.Logger}
+		mux.Handle(adapter.Pattern(), adapter)
 	}
 
 	// Apply middlewares in reverse order so the first middleware in the slice

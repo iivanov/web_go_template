@@ -8,6 +8,7 @@ import (
 	"project_template/pkg/messagebus"
 	"project_template/pkg/migrations"
 	"project_template/pkg/telemetry"
+	"project_template/pkg/validation"
 	"project_template/pkg/webserver"
 
 	"go.uber.org/fx"
@@ -20,6 +21,7 @@ func generalModules() []fx.Option {
 		migrations.Module,
 		telemetry.Module,
 		messagebus.Module,
+		validation.Module,
 		someboundedcontext.Module,
 		secondboundedcontext.Module,
 	}

@@ -2,9 +2,11 @@ package controller
 
 import (
 	"encoding/json/v2"
+	"errors"
 	"log/slog"
 	"net/http"
 
+	apperrors "project_template/internal/shared/errors"
 	"project_template/internal/someboundedcontext/services"
 )
 
@@ -25,28 +27,21 @@ func (*UserHandler) Pattern() string {
 	return "GET /api/users/{id}"
 }
 
-func (h *UserHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func (h *UserHandler) Handle(w http.ResponseWriter, r *http.Request) error {
 	id := r.PathValue("id")
-
 	if id == "" {
-		http.Error(w, "user id required", http.StatusBadRequest)
-
-		return
+		return apperrors.NewBadRequest("user id required")
 	}
 
 	user, err := h.userService.GetUser(r.Context(), id)
 	if err != nil {
+		if errors.Is(err, services.ErrUserNotFound) {
+			return apperrors.NewNotFound("user")
+		}
 		h.logger.Error("failed to get user", "error", err)
-		http.Error(w, "failed to get user", http.StatusInternalServerError)
-
-		return
+		return apperrors.NewInternalError("failed to get user")
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	if err := json.MarshalWrite(w, user); err != nil {
-		h.logger.Error("failed to encode user", "error", err)
-		w.WriteHeader(http.StatusInternalServerError)
-
-		return
-	}
+	return json.MarshalWrite(w, user)
 }

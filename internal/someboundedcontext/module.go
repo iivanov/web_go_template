@@ -13,8 +13,8 @@ var Module = fx.Module("someboundedcontext",
 	fx.Provide(
 		services.NewUserService,
 		repositories.NewUserRepository,
-		webserver.AsRoute(controller.NewUserHandler),
-		webserver.AsRoute(controller.NewUsersHandler),
-		webserver.AsRoute(controller.NewCreateUserHandler),
+		webserver.AsAppRoute(controller.NewUserHandler),
+		webserver.AsAppRoute(controller.NewUsersHandler),
+		webserver.AsAppRoute(controller.NewCreateUserHandler),
 	),
 )
