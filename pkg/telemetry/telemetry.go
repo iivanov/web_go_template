@@ -39,9 +39,9 @@ func NewTelemetry(lc fx.Lifecycle, cfg Config, logger *slog.Logger) (*Telemetry,
 			config: cfg,
 			logger: logger,
 		}, nil
-	} else {
-		logger.Info("Telemetry enabled")
 	}
+
+	logger.Info("Telemetry enabled")
 
 	ctx := context.Background()
 
@@ -130,7 +130,7 @@ func NewTelemetry(lc fx.Lifecycle, cfg Config, logger *slog.Logger) (*Telemetry,
 	return t, nil
 }
 
-// Tracer returns a tracer for the given instrumentation name
+// GetTracer returns a tracer for the given instrumentation name.
 func (t *Telemetry) GetTracer(name string) trace.Tracer {
 	if t.TracerProvider != nil {
 		return t.TracerProvider.Tracer(name)

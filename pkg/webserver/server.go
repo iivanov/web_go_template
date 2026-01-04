@@ -11,8 +11,9 @@ import (
 
 func NewHTTPServer(lc fx.Lifecycle, cfg Config, router *Router, logger *slog.Logger) *http.Server {
 	srv := &http.Server{
-		Addr:    fmt.Sprintf(":%d", cfg.Port),
-		Handler: router,
+		Addr:              fmt.Sprintf(":%d", cfg.Port),
+		Handler:           router,
+		ReadHeaderTimeout: cfg.ReadHeaderTimeout,
 	}
 
 	lc.Append(fx.Hook{

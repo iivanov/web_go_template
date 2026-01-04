@@ -9,7 +9,6 @@ import (
 	"project_template/internal/someboundedcontext/dto"
 	"project_template/internal/someboundedcontext/entities"
 	"project_template/internal/someboundedcontext/repositories"
-	repoErrors "project_template/internal/someboundedcontext/repositories"
 	"project_template/pkg/messagebus"
 	"project_template/pkg/telemetry"
 
@@ -49,7 +48,7 @@ func (s *UserService) GetUser(ctx context.Context, id string) (dto.UserResponse,
 
 	user, err := s.repository.GetByID(ctx, uid)
 	if err != nil {
-		if errors.Is(err, repoErrors.ErrUserNotFound) {
+		if errors.Is(err, repositories.ErrUserNotFound) {
 			return dto.UserResponse{}, ErrUserNotFound
 		}
 		telemetry.RecordError(span, err)

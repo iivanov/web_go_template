@@ -50,7 +50,7 @@ func (h *HandlerFunc) Handle(ctx context.Context, payload []byte) error {
 type Subscriber interface {
 	// Subscribe registers a handler for its topic.
 	Subscribe(handler Handler) error
-	// Run starts processing messages. Blocks until context is cancelled.
+	// Run starts processing messages. Blocks until context is canceled.
 	Run(ctx context.Context) error
 	// Close closes the subscriber.
 	Close() error

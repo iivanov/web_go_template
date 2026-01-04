@@ -47,9 +47,9 @@ fmt: ## Format Go code
 lint: ## Run linter (requires golangci-lint)
 	@echo "Running linter..."
 	@if command -v golangci-lint >/dev/null 2>&1; then \
-		golangci-lint run; \
+		GOEXPERIMENT=jsonv2 golangci-lint run; \
 	else \
-		echo "golangci-lint not installed. Install with: curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b \$$(go env GOPATH)/bin v1.57.2"; \
+		echo "golangci-lint not installed. Install with: curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b \$$(go env GOPATH)/bin"; \
 	fi
 
 migrate-create: ## Create a new migration file (usage: make migrate-create NAME=create_posts)
