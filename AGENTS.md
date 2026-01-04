@@ -144,15 +144,59 @@ func (e MyEvent) Topic() string {
 2. Export `Module` variable with fx providers
 3. Add to `internal/app/app.go` → `generalModules()`
 
-### Add Database Entity
+### Add Database Migration
 
-1. Create entity in `internal/<context>/entities/`
-2. Add auto-migration in context's `module.go`:
-   ```go
-   fx.Invoke(func(db *gorm.DB) error {
-       return db.AutoMigrate(&entities.MyEntity{})
-   })
+This project uses **Goose** for database migrations. Migrations are embedded in the binary and run automatically on startup (configurable via `APP_MIGRATIONS_RUN_ON_STARTUP=false`).
+
+1. Create a new migration file:
+   ```bash
+   make migrate-create NAME=create_posts
    ```
+
+2. Edit the generated file in `pkg/migrations/sql/`:
+   ```sql
+   -- +goose Up
+   -- +goose StatementBegin
+   CREATE TABLE posts (
+       id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+       title VARCHAR(255) NOT NULL,
+       created_at TIMESTAMPTZ DEFAULT NOW()
+   );
+   -- +goose StatementEnd
+
+   -- +goose Down
+   -- +goose StatementBegin
+   DROP TABLE posts;
+   -- +goose StatementEnd
+   ```
+
+3. Create matching GORM entity in `internal/<context>/entities/` (for queries only, no AutoMigrate):
+   ```go
+   type Post struct {
+       ID        uuid.UUID `gorm:"type:uuid;primaryKey"`
+       Title     string
+       CreatedAt time.Time
+   }
+   ```
+
+4. Rebuild and run - migrations execute automatically on startup.
+
+### Migration CLI Commands
+
+Run migrations manually using the CLI:
+
+```bash
+# Run all pending migrations
+./bin/gonewproject migrate up
+
+# Rollback the last migration
+./bin/gonewproject migrate down
+
+# Show migration status
+./bin/gonewproject migrate status
+```
+
+**Important:** Never use `db.AutoMigrate()`. All schema changes must go through Goose migrations.
 
 ## Code Style
 

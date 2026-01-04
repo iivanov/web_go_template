@@ -3,7 +3,6 @@ package database
 import (
 	"fmt"
 	"log/slog"
-	"os"
 
 	slogGorm "github.com/orandin/slog-gorm"
 	"gorm.io/driver/postgres"

@@ -1,4 +1,4 @@
-.PHONY: help build run test clean docker-up docker-down docker-logs deps fmt lint
+.PHONY: help build run test clean docker-up docker-down docker-logs deps fmt lint migrate-create
 
 help: ## Show this help message
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
@@ -51,3 +51,22 @@ lint: ## Run linter (requires golangci-lint)
 	else \
 		echo "golangci-lint not installed. Install with: curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b \$$(go env GOPATH)/bin v1.57.2"; \
 	fi
+
+migrate-create: ## Create a new migration file (usage: make migrate-create NAME=create_posts)
+	@if [ -z "$(NAME)" ]; then \
+		echo "Error: NAME is required. Usage: make migrate-create NAME=create_posts"; \
+		exit 1; \
+	fi
+	@echo "Creating migration: $(NAME)"
+	@TIMESTAMP=$$(date +%Y%m%d%H%M%S); \
+	FILE="pkg/migrations/sql/$${TIMESTAMP}_$(NAME).sql"; \
+	echo "-- +goose Up" > $$FILE; \
+	echo "-- +goose StatementBegin" >> $$FILE; \
+	echo "" >> $$FILE; \
+	echo "-- +goose StatementEnd" >> $$FILE; \
+	echo "" >> $$FILE; \
+	echo "-- +goose Down" >> $$FILE; \
+	echo "-- +goose StatementBegin" >> $$FILE; \
+	echo "" >> $$FILE; \
+	echo "-- +goose StatementEnd" >> $$FILE; \
+	echo "Created: $$FILE"

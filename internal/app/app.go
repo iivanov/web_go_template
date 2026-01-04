@@ -6,6 +6,7 @@ import (
 	"project_template/pkg/database"
 	"project_template/pkg/logger"
 	"project_template/pkg/messagebus"
+	"project_template/pkg/migrations"
 	"project_template/pkg/telemetry"
 	"project_template/pkg/webserver"
 
@@ -15,11 +16,12 @@ import (
 func generalModules() []fx.Option {
 	return []fx.Option{
 		logger.Module,
+		database.Module,
+		migrations.Module,
 		telemetry.Module,
 		messagebus.Module,
 		someboundedcontext.Module,
 		secondboundedcontext.Module,
-		database.Module,
 	}
 }
 

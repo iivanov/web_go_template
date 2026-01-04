@@ -6,6 +6,7 @@ import (
 	someboundedcontext "project_template/internal/someboundedcontext/config"
 	"project_template/pkg/database"
 	"project_template/pkg/messagebus"
+	"project_template/pkg/migrations"
 	"project_template/pkg/telemetry"
 	"project_template/pkg/webserver"
 	"strings"
@@ -22,6 +23,7 @@ type Config struct {
 	WebServer          webserver.Config          `mapstructure:"webserver"`
 	SomeBoundedContext someboundedcontext.Config `mapstructure:"someboundedcontext"`
 	Database           database.Config           `mapstructure:"database"`
+	Migrations         migrations.Config         `mapstructure:"migrations"`
 	Telemetry          telemetry.Config          `mapstructure:"telemetry"`
 	MessageBus         messagebus.Config         `mapstructure:"messagebus"`
 }
